@@ -17,11 +17,11 @@ class BaseUserManager(BUM):
             raise ValueError("The given username must be set")
 
         user = self.model(email=self.normalize_email(email.lower()),
-                          username = (username.lower()), 
-                          first_name = first_name,
-                          last_name = last_name,
-                          is_active=is_active, 
-                          is_admin=is_admin,
+                          username      = (username.lower()), 
+                          first_name    = first_name,
+                          last_name     = last_name,
+                          is_active     =is_active, 
+                          is_admin      =is_admin,
                           )
 
         if password is not None:
@@ -36,13 +36,13 @@ class BaseUserManager(BUM):
 
     def create_superuser(self, email, username, first_name, last_name, password=None,**extra_fields):
         user = self.create_user(
-            email=email,
-            username = username,
-            first_name = first_name,
-            last_name = last_name,
-            is_active=True,
-            is_admin=True,
-            password=password,
+            email       = email,
+            username    = username,
+            first_name  = first_name,
+            last_name   = last_name,
+            is_active   = True,
+            is_admin    = True,
+            password    = password,
             **extra_fields
         )
 
@@ -71,17 +71,17 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
             "unique": _("A user with that username already exists."),
         },
     )
-    first_name = models.CharField(_("first name"), max_length=150, blank=True)
-    last_name = models.CharField(_("last name"), max_length=150, blank=True)
+    first_name      = models.CharField(_("first name"), max_length=150, blank=True)
+    last_name       = models.CharField(_("last name"), max_length=150, blank=True)
 
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+    is_active       = models.BooleanField(default=True)
+    is_admin        = models.BooleanField(default=False)
 
-    objects = BaseUserManager()
+    objects         = BaseUserManager()
 
-    EMAIL_FIELD = "email"
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email"]
+    EMAIL_FIELD     = "email"
+    USERNAME_FIELD  = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.email

@@ -40,14 +40,13 @@ class ProfileApi(ApiAuthMixin, APIView):
 
 class RegisterApi(APIView):
 
-
     class InputRegisterSerializer(serializers.Serializer):
-        email = serializers.EmailField(max_length=255)
-        username = serializers.CharField(max_length=20)
-        first_name = serializers.CharField(max_length=20, required=False)
-        last_name = serializers.CharField(max_length=20, required=False)
-        bio = serializers.CharField(max_length=1000, required=False)
-        password = serializers.CharField(
+        email       = serializers.EmailField(max_length=255)
+        username    = serializers.CharField(max_length=20)
+        first_name  = serializers.CharField(max_length=20, required=False)
+        last_name   = serializers.CharField(max_length=20, required=False)
+        bio         = serializers.CharField(max_length=1000, required=False)
+        password    = serializers.CharField(
                 validators=[
                         number_validator,
                         letter_validator,
