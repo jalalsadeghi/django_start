@@ -1,6 +1,8 @@
 TODO List
 ------------
 
-1- profile cache []
-2- documentation []
-3- presentation  []
+1- blog: change the subscribtion URL from email to username []
+2- blog: create post edit                                   []
+3- blog: upload picture in post                             []
+4- users: upload profile picture                            []
+5- users: register and login with google account            []
