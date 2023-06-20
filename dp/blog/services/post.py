@@ -34,17 +34,20 @@ def subscribe(*, user: BaseUser, email: str) -> QuerySet[Subscription]:
     return sub
 
 
-def unsubscribe(*, user: BaseUser, email: str) -> dict:
-    target = BaseUser.objects.get(email=email)
+def unsubscribe(*, user: BaseUser, username: str) -> dict:
+    target = BaseUser.objects.get(username=username)
     Subscription.objects.get(subscriber=user, target=target).delete()
     cache_profile(user=user)
 
 @transaction.atomic
-def create_post(*, user: BaseUser, title: str, content: str) -> QuerySet[Post]:
+def post_create(*, user:BaseUser, title:str, content:str) -> QuerySet[Post]:
     post = Post.objects.create(
         author=user, title=title, content=content, slug=slugify(title)
     )
 
     cache_profile(user=user)
     return post
+
+def post_delete(*, user:BaseUser, id:int):
+    Post.objects.get(author=user, id=id).delete()
 

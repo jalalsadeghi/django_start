@@ -13,12 +13,11 @@ from dp.blog.services.post import unsubscribe, subscribe
 from dp.api.mixins import ApiAuthMixin
 
 
-class SubscribeDetailApi(ApiAuthMixin, APIView):
+class UnsubscribeApi(ApiAuthMixin, APIView):
 
-    def delete(self, request, email):
-
+    def delete(self, request, username):
         try:
-            unsubscribe(user=request.user, email=email)
+            unsubscribe(user=request.user, username=username)
         except Exception as ex:
             return Response(
                 {"detail": "Database Error - " + str(ex)},

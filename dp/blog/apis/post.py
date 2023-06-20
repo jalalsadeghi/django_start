@@ -10,8 +10,8 @@ from dp.api.pagination import  get_paginated_response, LimitOffsetPagination, ge
 from rest_framework.pagination import PageNumberPagination
 
 from dp.blog.models import Post 
-from dp.blog.selectors.posts import post_detail, post_list 
-from dp.blog.services.post import create_post 
+from dp.blog.selectors.posts import post_detail, post_list
+from dp.blog.services.post import post_create, post_delete
 from dp.api.mixins import ApiAuthMixin
 
 
@@ -49,14 +49,14 @@ class PostApi(ApiAuthMixin, APIView):
             return request.build_absolute_uri(path)
 
     @extend_schema(
-        responses=OutPutPostSerializer,
-        request=InputPostSerializer,
+        responses   = OutPutPostSerializer,
+        request     = InputPostSerializer,
     )
     def post(self, request):
         serializer = self.InputPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            query = create_post(
+            query = post_create(
                 user    = request.user,
                 content = serializer.validated_data.get("content"),
                 title   = serializer.validated_data.get("title"),
@@ -94,10 +94,8 @@ class PostApi(ApiAuthMixin, APIView):
 
 
 class PostDetailApi(ApiAuthMixin, APIView):
-    class Pagination(LimitOffsetPagination):
-        default_limit = 10
 
-    class OutPutDetailSerializer(serializers.ModelSerializer):
+    class OutPutPostDetailSerializer(serializers.ModelSerializer):
         author = serializers.SerializerMethodField("get_author")
 
         class Meta:
@@ -109,7 +107,7 @@ class PostDetailApi(ApiAuthMixin, APIView):
 
 
     @extend_schema(
-        responses=OutPutDetailSerializer,
+        responses=OutPutPostDetailSerializer,
     )
     def get(self, request, id, slug):
 
@@ -124,3 +122,18 @@ class PostDetailApi(ApiAuthMixin, APIView):
         serializer = self.OutPutDetailSerializer(query)
 
         return Response(serializer.data) 
+    
+class PostDeleteApi(ApiAuthMixin, APIView):
+
+    def delete(self, request, id):
+
+        try:
+            post_delete(user=request.user, id=id)
+        except Exception as ex:
+            return Response(
+                {"detail": "Database Error - " + str(ex)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
