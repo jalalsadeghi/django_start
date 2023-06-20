@@ -22,6 +22,8 @@ LOCAL_APPS = [
     'dp.tasks.apps.TasksConfig',
     'dp.users.apps.UsersConfig',
     'dp.authentication.apps.AuthenticationConfig',
+    'dp.files.apps.FilesConfig',
+    'dp.integrations.apps.IntegrationsConfig',
 ]
 
 THIRD_PARTY_APPS = [
