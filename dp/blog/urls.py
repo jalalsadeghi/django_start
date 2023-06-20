@@ -9,6 +9,6 @@ urlpatterns = [
         path("subscribe/",              SubscribeApi.as_view(), name="subscribe"),
         path("subscribe/<str:username>",   SubscribeDetailApi.as_view(), name="subscribe_detail"),
         path("post/",                   PostApi.as_view(), name="post"),
-        path("post/<slug:slug>",        PostDetailApi.as_view(), name="post_detail"),
+        path("post/<int:id>/<slug:slug>",        PostDetailApi.as_view(), name="post_detail"),
         ]
 

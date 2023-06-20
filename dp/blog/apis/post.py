@@ -26,6 +26,7 @@ class PostApi(ApiAuthMixin, APIView):
         author__in          = serializers.CharField(required=False, max_length=100)
         slug                = serializers.CharField(required=False, max_length=100)
         content             = serializers.CharField(required=False, max_length=1000)
+        id                  = serializers.IntegerField(required=False)
 
     class InputPostSerializer(serializers.Serializer):
         content = serializers.CharField(max_length=1000)
@@ -37,14 +38,14 @@ class PostApi(ApiAuthMixin, APIView):
 
         class Meta:
             model = Post
-            fields = ("url", "title", "author")
+            fields = ("id", "url", "title", "content", "author")
 
         def get_author(self, post):
             return post.author.username
 
         def get_url(self, post):
             request = self.context.get("request")
-            path    = reverse("api:blog:post_detail", args=(post.slug,))
+            path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
             return request.build_absolute_uri(path)
 
     @extend_schema(
@@ -56,9 +57,9 @@ class PostApi(ApiAuthMixin, APIView):
         serializer.is_valid(raise_exception=True)
         try:
             query = create_post(
-                user=request.user,
-                content=serializer.validated_data.get("content"),
-                title=serializer.validated_data.get("title"),
+                user    = request.user,
+                content = serializer.validated_data.get("content"),
+                title   = serializer.validated_data.get("title"),
             )
         except Exception as ex:
             return Response(
@@ -101,7 +102,7 @@ class PostDetailApi(ApiAuthMixin, APIView):
 
         class Meta:
             model = Post
-            fields = ("author", "slug", "title", "content", "created_at", "updated_at")
+            fields = ("id", "author", "slug", "title", "content", "created_at", "updated_at")
 
         def get_author(self, post):
             return post.author.username
@@ -110,10 +111,10 @@ class PostDetailApi(ApiAuthMixin, APIView):
     @extend_schema(
         responses=OutPutDetailSerializer,
     )
-    def get(self, request, slug):
+    def get(self, request, id, slug):
 
         try:
-            query = post_detail(slug=slug, user=request.user)
+            query = post_detail(id=id, slug=slug, user=request.user)
         except Exception as ex:
             return Response(
                 {"detail": "Filter Error - " + str(ex)},

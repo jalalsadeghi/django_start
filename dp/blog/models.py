@@ -5,14 +5,11 @@ from dp.users.models import BaseUser
 
 
 class Post(BaseModel):
-
     slug = models.SlugField(
-            primary_key=True,
             max_length=100,
     )
     title = models.CharField(
         max_length=100,
-        unique=True,
     )
     content = models.CharField(
         max_length=1000,

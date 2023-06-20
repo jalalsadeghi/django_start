@@ -20,8 +20,8 @@ class BaseUserManager(BUM):
                           username      = (username.lower()), 
                           first_name    = first_name,
                           last_name     = last_name,
-                          is_active     =is_active, 
-                          is_admin      =is_admin,
+                          is_active     = is_active, 
+                          is_admin      = is_admin,
                           )
 
         if password is not None:
