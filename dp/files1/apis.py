@@ -3,14 +3,16 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from dp.api.mixins import ApiAuthMixin
+# from dp.api.mixins import ApiAuthMixin
 from dp.files.models import File
 from dp.files.services import (
     FileDirectUploadService,
     FileStandardUploadService,
 )
 
-
+class ApiAuthMixin:
+    ...
+    
 class FileStandardUploadApi(ApiAuthMixin, APIView):
     def post(self, request):
         service = FileStandardUploadService(user=request.user, file_obj=request.FILES["file"])
