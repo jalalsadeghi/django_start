@@ -11,7 +11,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from dp.blog.models import Post 
 from dp.blog.selectors.posts import post_detail, post_list
-from dp.blog.services.post import post_create, post_delete
+from dp.blog.services.post import post_create, post_delete,post_update
 from dp.api.mixins import ApiAuthMixin
 
 
@@ -29,8 +29,8 @@ class PostApi(ApiAuthMixin, APIView):
         id                  = serializers.IntegerField(required=False)
 
     class InputPostSerializer(serializers.Serializer):
-        content = serializers.CharField(max_length=1000)
         title   = serializers.CharField(max_length=100)
+        content = serializers.CharField(max_length=1000)
 
     class OutPutPostSerializer(serializers.ModelSerializer):
         author  = serializers.SerializerMethodField("get_author")
@@ -58,8 +58,8 @@ class PostApi(ApiAuthMixin, APIView):
         try:
             query = post_create(
                 user    = request.user,
-                content = serializer.validated_data.get("content"),
                 title   = serializer.validated_data.get("title"),
+                content = serializer.validated_data.get("content"),
             )
         except Exception as ex:
             return Response(
@@ -119,10 +119,56 @@ class PostDetailApi(ApiAuthMixin, APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = self.OutPutDetailSerializer(query)
+        serializer = self.OutPutPostDetailSerializer(query)
 
         return Response(serializer.data) 
     
+class PostUpdateApi(ApiAuthMixin, APIView):
+
+    class InputPostUpdateSerializer(serializers.Serializer):
+        title   = serializers.CharField(max_length=100)
+        content = serializers.CharField(max_length=1000)
+        
+    
+    class OutPutPostUpdateSerializer(serializers.ModelSerializer):
+        author  = serializers.SerializerMethodField("get_author")
+        url     = serializers.SerializerMethodField("get_url")
+
+        class Meta:
+            model = Post
+            fields = ("id", "url", "title", "content", "author")
+
+        def get_author(self, post):
+            return post.author.username
+
+        def get_url(self, post):
+            request = self.context.get("request")
+            path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
+            return request.build_absolute_uri(path)
+        
+    @extend_schema(
+        request     = InputPostUpdateSerializer,
+        responses   = OutPutPostUpdateSerializer,
+    )
+    def post(self, request, id):
+        serializer = self.InputPostUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            query = post_update(
+                user    = request.user,
+                title   = serializer.validated_data.get("title"),
+                content = serializer.validated_data.get("content"),
+                id      = id,                
+            )
+        except Exception as ex:
+            return Response(
+                {"detail": "Database Error - " + str(ex)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(self.OutPutPostUpdateSerializer(query, context={"request":request}).data)
+        # return Response(status=status.HTTP_204_NO_CONTENT)
+
 class PostDeleteApi(ApiAuthMixin, APIView):
 
     def delete(self, request, id):
@@ -136,4 +182,3 @@ class PostDeleteApi(ApiAuthMixin, APIView):
             )
         
         return Response(status=status.HTTP_204_NO_CONTENT)
-

@@ -48,6 +48,16 @@ def post_create(*, user:BaseUser, title:str, content:str) -> QuerySet[Post]:
     cache_profile(user=user)
     return post
 
-def post_delete(*, user:BaseUser, id:int):
-    Post.objects.get(author=user, id=id).delete()
+@transaction.atomic
+def post_update(*, user:BaseUser, id:int, title:str, content:str) -> QuerySet[Post]:
+    Post.objects.filter(author=user, id=id).update(title=title, content=content, slug=slugify(title))
+    post = Post.objects.get(
+        author=user, title=title, content=content, slug=slugify(title)
+    )
+    return post
 
+def post_delete(*, user:BaseUser, id:int):
+    post = Post.objects.get(author=user, id=id).delete()
+
+    cache_profile(user=user)
+    return post
