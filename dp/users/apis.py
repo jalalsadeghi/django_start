@@ -2,14 +2,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from django.core.validators import MinLengthValidator
 from .validators import number_validator, special_char_validator, letter_validator
-from dp.users.models import BaseUser , Profile
 from dp.api.mixins import ApiAuthMixin
+
+from dp.users.models import BaseUser , Profile
 from dp.users.selectors import get_profile
 from dp.users.services import register 
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from drf_spectacular.utils import extend_schema
 from django.core.cache import cache

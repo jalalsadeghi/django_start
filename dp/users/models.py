@@ -9,7 +9,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
 
 class BaseUserManager(BUM):
-    def create_user(self, email, username, first_name, last_name, is_active=True, is_admin=False, password=None):
+    def create_user(self, username, password, email, first_name, last_name, is_active=True, is_admin=False, is_superuser=False):
         if not email:
             raise ValueError("Users must have an email address")
         
@@ -22,6 +22,7 @@ class BaseUserManager(BUM):
                           last_name     = last_name,
                           is_active     = is_active, 
                           is_admin      = is_admin,
+                          is_superuser  = is_superuser,
                           )
 
         if password is not None:
@@ -33,23 +34,34 @@ class BaseUserManager(BUM):
         user.save(using=self._db)
 
         return user
-
-    def create_superuser(self, email, username, first_name, last_name, password=None,**extra_fields):
+    def create_superuser(self, username, password, email):
         user = self.create_user(
+            username    = username, 
+            password    = password, 
             email       = email,
-            username    = username,
-            first_name  = first_name,
-            last_name   = last_name,
-            is_active   = True,
+            first_name  = username,
+            last_name   = username, 
+            is_active   = True, 
             is_admin    = True,
-            password    = password,
-            **extra_fields
-        )
-
-        user.is_superuser = True
+            is_superuser= True)
+        user.is_admin = True
         user.save(using=self._db)
-
         return user
+    # def create_superuser(self, username, password=None, email):
+    #     user = self.create_superuser(
+    #         email       = email,
+    #         username    = username,
+    #         # first_name  = first_name,
+    #         # last_name   = last_name,
+    #         # is_active   = True,
+    #         # is_admin    = True,
+    #         password    = password,
+    #     )
+
+    #     user.is_superuser = True
+    #     user.save(using=self._db)
+
+    #     return user
 
 
 class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
@@ -71,8 +83,8 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
             "unique": _("A user with that username already exists."),
         },
     )
-    first_name      = models.CharField(_("first name"), max_length=150, blank=True)
-    last_name       = models.CharField(_("last name"), max_length=150, blank=True)
+    first_name      = models.CharField(_("first name"), max_length=150,)
+    last_name       = models.CharField(_("last name"), max_length=150,)
 
     is_active       = models.BooleanField(default=True)
     is_admin        = models.BooleanField(default=False)
