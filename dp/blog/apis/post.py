@@ -10,11 +10,45 @@ from dp.api.pagination import  get_paginated_response, LimitOffsetPagination, ge
 from rest_framework.pagination import PageNumberPagination
 
 from dp.blog.models import Post 
-from dp.blog.selectors.posts import post_detail, post_list
+from dp.blog.selectors.posts import post_detail, post_list,postAll_list
 from dp.blog.services.post import post_create, post_delete,post_update
 from dp.api.mixins import ApiAuthMixin
 
+class PostAllApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 10
 
+    class OutPutPostAllSerializer(serializers.ModelSerializer):
+        author  = serializers.SerializerMethodField("get_author")
+
+        class Meta:
+            model = Post
+            fields = ("id", "title", "author")
+
+        def get_author(self, post):
+            return post.author.username
+
+    @extend_schema(
+        responses=OutPutPostAllSerializer,
+    )
+    def get(self, request):
+        
+        try:
+            query = postAll_list()
+        except Exception as ex:
+            return Response(
+                {"detail": "Filter Error - " + str(ex)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return get_paginated_response_context(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutPutPostAllSerializer,
+            queryset=query,
+            request=request,
+            view=self,
+        )
+    
 class PostApi(ApiAuthMixin, APIView):
     class Pagination(LimitOffsetPagination):
         default_limit = 10

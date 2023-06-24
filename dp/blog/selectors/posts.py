@@ -24,3 +24,7 @@ def post_list(*, filters=None, user:BaseUser, self_include:bool = True) -> Query
         return PostFilter(filters, qs).qs
     return Post.objects.none()
 
+def postAll_list() -> QuerySet[Post]:
+
+    return Post.objects.all()
+
