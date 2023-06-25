@@ -16,12 +16,13 @@ from drf_spectacular.utils import extend_schema
 from django.core.cache import cache
 
 
+        
 class ProfileApi(ApiAuthMixin, APIView):
 
     class OutPutSerializer(serializers.ModelSerializer):
         class Meta:
             model = Profile 
-            fields = ("bio", "posts_count", "subscriber_count", "subscription_count")
+            fields = ("posts_count", "subscriber_count", "subscription_count")
 
         def to_representation(self, instance):
             rep = super().to_representation(instance)
@@ -44,9 +45,9 @@ class RegisterApi(APIView):
     class InputRegisterSerializer(serializers.Serializer):
         email       = serializers.EmailField(max_length=255)
         username    = serializers.CharField(max_length=20)
-        first_name  = serializers.CharField(max_length=20, required=False)
-        last_name   = serializers.CharField(max_length=20, required=False)
-        bio         = serializers.CharField(max_length=1000, required=False)
+        # first_name  = serializers.CharField(max_length=20, required=False)
+        # last_name   = serializers.CharField(max_length=20, required=False)
+        # bio         = serializers.CharField(max_length=1000, required=False)
         password    = serializers.CharField(
                 validators=[
                         number_validator,
@@ -104,10 +105,10 @@ class RegisterApi(APIView):
             user = register(
                     email       =serializer.validated_data.get("email"),
                     username    =serializer.validated_data.get("username"),
-                    first_name  =serializer.validated_data.get("first_name"),
-                    last_name   =serializer.validated_data.get("last_name"),
+                    # first_name  =serializer.validated_data.get("first_name"),
+                    # last_name   =serializer.validated_data.get("last_name"),
+                    # bio         =serializer.validated_data.get("bio"),
                     password    =serializer.validated_data.get("password"),
-                    bio         =serializer.validated_data.get("bio"),
                     )
         except Exception as ex:
             return Response(

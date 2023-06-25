@@ -83,8 +83,8 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
             "unique": _("A user with that username already exists."),
         },
     )
-    first_name      = models.CharField(_("first name"), max_length=150,)
-    last_name       = models.CharField(_("last name"), max_length=150,)
+    first_name      = models.CharField(_("first name"), max_length=150, null=True, blank=True)
+    last_name       = models.CharField(_("last name"), max_length=150, null=True, blank=True)
 
     is_active       = models.BooleanField(default=True)
     is_admin        = models.BooleanField(default=False)
@@ -92,8 +92,8 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     objects         = BaseUserManager()
 
     EMAIL_FIELD     = "email"
-    USERNAME_FIELD  = "email"
-    REQUIRED_FIELDS = ["username"]
+    USERNAME_FIELD  = "username"
+    REQUIRED_FIELDS = ["email"]
 
     def __str__(self):
         return self.email
