@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from dp.files.apis import (
+from .apis import (
     FileDirectUploadFinishApi,
     FileDirectUploadLocalApi,
     FileDirectUploadStartApi,

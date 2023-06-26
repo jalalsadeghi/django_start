@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.core.validators import MinLengthValidator
 from .validators import number_validator, special_char_validator, letter_validator
@@ -15,11 +16,26 @@ from dp.users.services import register
 from drf_spectacular.utils import extend_schema
 from django.core.cache import cache
 
+from typing import Optional
 
-        
+
+class LoginJwtApi(TokenObtainPairView):
+    class OutPutLoginSerializer(serializers.ModelSerializer):
+        # roles = serializers.SerializerMethodField("user_roles")
+        class Meta:
+            model = BaseUser
+            fields = ("id","username")
+    # def user_roles()
+    @extend_schema(
+        responses=OutPutLoginSerializer,
+    )
+    def get(self):
+        return Response(self.OutPutLoginSerializer)
+
+
 class ProfileApi(ApiAuthMixin, APIView):
 
-    class OutPutSerializer(serializers.ModelSerializer):
+    class OutPutProfileSerializer(serializers.ModelSerializer):
         class Meta:
             model = Profile 
             fields = ("posts_count", "subscriber_count", "subscription_count")
@@ -34,10 +50,10 @@ class ProfileApi(ApiAuthMixin, APIView):
 
             return rep
 
-    @extend_schema(responses=OutPutSerializer)
+    @extend_schema(responses=OutPutProfileSerializer)
     def get(self, request):
         query = get_profile(user=request.user)
-        return Response(self.OutPutSerializer(query, context={"request":request}).data)
+        return Response(self.OutPutProfileSerializer(query, context={"request":request}).data)
 
 
 class RegisterApi(APIView):
@@ -85,7 +101,7 @@ class RegisterApi(APIView):
             model = BaseUser 
             fields = ("email", "username", "token", "created_at", "updated_at")
 
-        def get_token(self, user):
+        def get_token(self, user) -> Optional[str]:
             data = dict()
             token_class = RefreshToken
 

@@ -12,9 +12,12 @@ from dp.blog.selectors.posts import get_subscribers
 from dp.blog.services.post import unsubscribe, subscribe
 from dp.api.mixins import ApiAuthMixin
 
+from typing import Optional
+
 
 class UnsubscribeApi(ApiAuthMixin, APIView):
-
+    
+    @extend_schema(request=None,responses=None)
     def delete(self, request, username):
         try:
             unsubscribe(user=request.user, username=username)
@@ -42,7 +45,7 @@ class SubscribeApi(ApiAuthMixin, APIView):
             model = Subscription 
             fields = ("email",)
 
-        def get_email(self, subscription):
+        def get_email(self, subscription) -> Optional[str]:
             return subscription.target.email
 
 

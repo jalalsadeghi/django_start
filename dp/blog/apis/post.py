@@ -14,19 +14,27 @@ from dp.blog.selectors.posts import post_detail, post_list,postAll_list
 from dp.blog.services.post import post_create, post_delete,post_update
 from dp.api.mixins import ApiAuthMixin
 
+from typing import Optional
+
 class PostAllApi(APIView):
     class Pagination(LimitOffsetPagination):
         default_limit = 10
 
     class OutPutPostAllSerializer(serializers.ModelSerializer):
         author  = serializers.SerializerMethodField("get_author")
+        url     = serializers.SerializerMethodField("get_url")
 
         class Meta:
             model = Post
-            fields = ("id", "title", "author")
+            fields = ("id", "title", "url", "author")
 
-        def get_author(self, post):
+        def get_author(self, post) -> Optional[str]:
             return post.author.username
+        
+        def get_url(self, post) -> Optional[str]:
+            request = self.context.get("request")
+            path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
+            return request.build_absolute_uri(path)
 
     @extend_schema(
         responses=OutPutPostAllSerializer,
@@ -74,10 +82,10 @@ class PostApi(ApiAuthMixin, APIView):
             model = Post
             fields = ("id", "url", "title", "content", "author")
 
-        def get_author(self, post):
+        def get_author(self, post) -> Optional[str]:
             return post.author.username
 
-        def get_url(self, post):
+        def get_url(self, post) -> Optional[str]:
             request = self.context.get("request")
             path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
             return request.build_absolute_uri(path)
@@ -136,7 +144,7 @@ class PostDetailApi(ApiAuthMixin, APIView):
             model = Post
             fields = ("id", "author", "slug", "title", "content", "created_at", "updated_at")
 
-        def get_author(self, post):
+        def get_author(self, post) -> Optional[str]:
             return post.author.username
 
 
@@ -172,13 +180,13 @@ class PostUpdateApi(ApiAuthMixin, APIView):
             model = Post
             fields = ("id", "url", "title", "content", "author")
 
-        def get_author(self, post):
+        def get_author(self, post) -> Optional[str]:
             return post.author.username
 
-        def get_url(self, post):
+        def get_url(self, post) -> Optional[str]:
             request = self.context.get("request")
             path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
-            return request.build_absolute_uri(path)
+            return request.build_absolute_uri(path) if request else None
         
     @extend_schema(
         request     = InputPostUpdateSerializer,
@@ -204,7 +212,7 @@ class PostUpdateApi(ApiAuthMixin, APIView):
         # return Response(status=status.HTTP_204_NO_CONTENT)
 
 class PostDeleteApi(ApiAuthMixin, APIView):
-
+    @extend_schema(request=None,responses=None)
     def delete(self, request, id):
 
         try:

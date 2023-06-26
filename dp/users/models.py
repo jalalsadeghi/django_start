@@ -47,23 +47,7 @@ class BaseUserManager(BUM):
         user.is_admin = True
         user.save(using=self._db)
         return user
-    # def create_superuser(self, username, password=None, email):
-    #     user = self.create_superuser(
-    #         email       = email,
-    #         username    = username,
-    #         # first_name  = first_name,
-    #         # last_name   = last_name,
-    #         # is_active   = True,
-    #         # is_admin    = True,
-    #         password    = password,
-    #     )
-
-    #     user.is_superuser = True
-    #     user.save(using=self._db)
-
-    #     return user
-
-
+    
 class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(verbose_name = "email address",
