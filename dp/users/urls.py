@@ -1,5 +1,5 @@
 from django.urls import path
-from .apis import LoginJwtApi, ProfileApi, RegisterApi
+from .apis import ProfileApi, RegisterApi,LoginJwtApi
 
 
 urlpatterns = [

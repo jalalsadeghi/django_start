@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.core.validators import MinLengthValidator
@@ -20,17 +22,20 @@ from typing import Optional
 
 
 class LoginJwtApi(TokenObtainPairView):
-    class OutPutLoginSerializer(serializers.ModelSerializer):
-        # roles = serializers.SerializerMethodField("user_roles")
-        class Meta:
-            model = BaseUser
-            fields = ("id","username")
-    # def user_roles()
-    @extend_schema(
-        responses=OutPutLoginSerializer,
-    )
-    def get(self):
-        return Response(self.OutPutLoginSerializer)
+
+    class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+        def validate(self, attrs):
+            data = super().validate(attrs)
+            refresh = self.get_token(self.user)
+
+            # Add extra responses here
+            data['username'] = self.user.username
+            data['email'] = self.user.email
+            data['groups'] = self.user.groups.values_list('name', flat=True)
+            return data
+        
+    serializer_class = MyTokenObtainPairSerializer
+
 
 
 class ProfileApi(ApiAuthMixin, APIView):
@@ -61,9 +66,6 @@ class RegisterApi(APIView):
     class InputRegisterSerializer(serializers.Serializer):
         email       = serializers.EmailField(max_length=255)
         username    = serializers.CharField(max_length=20)
-        # first_name  = serializers.CharField(max_length=20, required=False)
-        # last_name   = serializers.CharField(max_length=20, required=False)
-        # bio         = serializers.CharField(max_length=1000, required=False)
         password    = serializers.CharField(
                 validators=[
                         number_validator,
@@ -121,9 +123,6 @@ class RegisterApi(APIView):
             user = register(
                     email       =serializer.validated_data.get("email"),
                     username    =serializer.validated_data.get("username"),
-                    # first_name  =serializer.validated_data.get("first_name"),
-                    # last_name   =serializer.validated_data.get("last_name"),
-                    # bio         =serializer.validated_data.get("bio"),
                     password    =serializer.validated_data.get("password"),
                     )
         except Exception as ex:
@@ -132,4 +131,5 @@ class RegisterApi(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                     )
         return Response(self.OutPutRegisterSerializer(user, context={"request":request}).data)
+
 
