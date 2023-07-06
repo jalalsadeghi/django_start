@@ -12,12 +12,12 @@ from dp.tests.factories import (
 
 @pytest.fixture
 def api_client():
-    user = BaseUser.objects.create_user(email='test_user@js.com', password='pass@1test')
+    user = BaseUser.objects.create_user(username= 'testuser', password='Jalal123!@#',email='testuser@gmail.com', first_name = None, last_name = None)
     client = APIClient()
     refresh = RefreshToken.for_user(user)
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
-    return client
+    return client 
 
 @pytest.fixture
 def user1():

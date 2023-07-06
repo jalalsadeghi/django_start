@@ -29,9 +29,10 @@ class LoginJwtApi(TokenObtainPairView):
             refresh = self.get_token(self.user)
 
             # Add extra responses here
-            data['username'] = self.user.username
-            data['email'] = self.user.email
-            data['groups'] = self.user.groups.values_list('name', flat=True)
+            # data['username'] = self.user.username
+            # data['email'] = self.user.email
+            # data['groups'] = self.user.groups.values_list('name', flat=True)
+            data['roles'] = self.user.groups.values_list('id', flat=True)
             return data
         
     serializer_class = MyTokenObtainPairSerializer

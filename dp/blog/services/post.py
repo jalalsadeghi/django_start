@@ -40,9 +40,15 @@ def unsubscribe(*, user: BaseUser, username: str) -> dict:
     cache_profile(user=user)
 
 @transaction.atomic
-def post_create(*, user:BaseUser, title:str, content:str) -> QuerySet[Post]:
+def post_create(*, user:BaseUser, title:str, content:str, image_id:int) -> QuerySet[Post]:
+    if image_id == 0:
+        image_id=""
     post = Post.objects.create(
-        author=user, title=title, content=content, slug=slugify(title)
+        author  = user, 
+        title   = title, 
+        content = content,
+        image_id= image_id, 
+        slug    = slugify(title)
     )
 
     cache_profile(user=user)

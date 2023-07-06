@@ -28,12 +28,12 @@ def test_auth_api(api_client, user1, subscription1, profile1, post1):
 @pytest.mark.django_db
 def test_login(user1, subscription1, profile1, post1):
     user = BaseUser.objects.create_user(
-        email="js@js.com", password="js.sj"
+       username='JalalTest' , password="Jalal123!@#", email="JalalTest@gmail.com", first_name=None, last_name=None
     )
 
     client = APIClient()
-    url_ = reverse("api:auth:jwt:login")
-    body = {"email": user.email, "password": "js.sj"}
+    url_ = reverse("api:users:login")
+    body = {"email": user.email, "password": "Jalal123!@#"}
     response = client.post(url_, json.dumps(body), content_type="application/json")
     auth = json.loads(response.content)
     access = auth.get("access")

@@ -109,11 +109,11 @@ class FileDirectUploadService:
     @transaction.atomic
     def start(self, *, file_name: str, file_type: str) -> Dict[str, Any]:
         file = File(
-            original_file_name=file_name,
-            file_name=file_generate_name(file_name),
-            file_type=file_type,
-            uploaded_by=self.user,
-            file=None,
+            original_file_name  = file_name,
+            file_name           = file_generate_name(file_name),
+            file_type           = file_type,
+            uploaded_by         = self.user,
+            file                = None,
         )
         file.full_clean()
         file.save()

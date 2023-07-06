@@ -10,12 +10,8 @@ from dp.files.services import (
     FileStandardUploadService,
 )
 
-from drf_spectacular.utils import extend_schema
-
 
 class FileStandardUploadApi(ApiAuthMixin, APIView):
-    
-    @extend_schema(request=None, responses=None)
     def post(self, request):
         service = FileStandardUploadService(user=request.user, file_obj=request.FILES["file"])
         file = service.create()
@@ -24,16 +20,12 @@ class FileStandardUploadApi(ApiAuthMixin, APIView):
 
 
 class FileDirectUploadStartApi(ApiAuthMixin, APIView):
-    class InputDirectUploadStartSerializer(serializers.Serializer):
+    class InputSerializer(serializers.Serializer):
         file_name = serializers.CharField()
         file_type = serializers.CharField()
 
-    @extend_schema(
-            request=InputDirectUploadStartSerializer,
-            responses=None
-    )
     def post(self, request, *args, **kwargs):
-        serializer = self.InputDirectUploadStartSerializer(data=request.data)
+        serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         service = FileDirectUploadService(request.user)
@@ -43,8 +35,6 @@ class FileDirectUploadStartApi(ApiAuthMixin, APIView):
 
 
 class FileDirectUploadLocalApi(ApiAuthMixin, APIView):
-
-    @extend_schema(request=None, responses=None)
     def post(self, request, file_id):
         file = get_object_or_404(File, id=file_id)
 
@@ -52,7 +42,7 @@ class FileDirectUploadLocalApi(ApiAuthMixin, APIView):
 
         service = FileDirectUploadService(request.user)
         file = service.upload_local(file=file, file_obj=file_obj)
-        
+
         return Response({"id": file.id})
 
 
@@ -60,7 +50,6 @@ class FileDirectUploadFinishApi(ApiAuthMixin, APIView):
     class InputSerializer(serializers.Serializer):
         file_id = serializers.CharField()
 
-    @extend_schema(request=None, responses=InputSerializer)
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

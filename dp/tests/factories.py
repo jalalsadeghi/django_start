@@ -16,6 +16,7 @@ class BaseUserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BaseUser
 
+    username = factory.Iterator(['frcom', 'itcom', 'escom'])
     email    = factory.Iterator(['fr@gmail.com', 'it@gmail.com', 'es@gmail.com'])
     password = factory.PostGenerationMethodCall('set_password', 'adm1n')
 

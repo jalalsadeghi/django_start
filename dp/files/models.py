@@ -12,8 +12,8 @@ class File(BaseModel):
 
     original_file_name = models.TextField()
 
-    file_name = models.CharField(max_length=255, unique=True)
-    file_type = models.CharField(max_length=255)
+    file_name   = models.CharField(max_length=255, unique=True)
+    file_type   = models.CharField(max_length=255)
 
     # As a specific behavior,
     # We might want to preserve files after the uploader has been deleted.

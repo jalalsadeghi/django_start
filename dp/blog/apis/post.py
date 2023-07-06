@@ -6,12 +6,15 @@ from rest_framework import status
 from drf_spectacular.utils import extend_schema
 from django.urls import reverse
 
-from dp.api.pagination import  get_paginated_response, LimitOffsetPagination, get_paginated_response_context
+from dp.api.pagination import get_paginated_response, LimitOffsetPagination, get_paginated_response_context
 from rest_framework.pagination import PageNumberPagination
 
 from dp.blog.models import Post 
 from dp.blog.selectors.posts import post_detail, post_list,postAll_list
 from dp.blog.services.post import post_create, post_delete,post_update
+
+from dp.files.services import FileStandardUploadService
+
 from dp.api.mixins import ApiAuthMixin
 
 from typing import Optional
@@ -21,26 +24,31 @@ class PostAllApi(APIView):
         default_limit = 10
 
     class OutPutPostAllSerializer(serializers.ModelSerializer):
-        author  = serializers.SerializerMethodField("get_author")
-        url     = serializers.SerializerMethodField("get_url")
+        author = serializers.SerializerMethodField("get_author")
+        url = serializers.SerializerMethodField("get_url")
+        image_url = serializers.SerializerMethodField("get_image_url")
 
         class Meta:
             model = Post
-            fields = ("id", "title", "url", "author")
+            fields = ("id", "title", "url", "author", "image_url")
 
         def get_author(self, post) -> Optional[str]:
             return post.author.username
         
         def get_url(self, post) -> Optional[str]:
             request = self.context.get("request")
-            path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
+            path = reverse("api:blog:post_detail", args=(post.id, post.slug,))
             return request.build_absolute_uri(path)
 
+        def get_image_url(self, post) -> Optional[str]:
+            if post.image_id:
+                return post.image.url
+            
     @extend_schema(
         responses=OutPutPostAllSerializer,
     )
     def get(self, request):
-        
+
         try:
             query = postAll_list()
         except Exception as ex:
@@ -48,15 +56,16 @@ class PostAllApi(APIView):
                 {"detail": "Filter Error - " + str(ex)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        return get_paginated_response_context(
+        data = get_paginated_response_context(
             pagination_class=self.Pagination,
             serializer_class=self.OutPutPostAllSerializer,
             queryset=query,
             request=request,
             view=self,
         )
-    
+        return data
+
+
 class PostApi(ApiAuthMixin, APIView):
     class Pagination(LimitOffsetPagination):
         default_limit = 10
@@ -73,14 +82,16 @@ class PostApi(ApiAuthMixin, APIView):
     class InputPostSerializer(serializers.Serializer):
         title   = serializers.CharField(max_length=100)
         content = serializers.CharField(max_length=1000)
+        file    = serializers.FileField(required=False)
 
     class OutPutPostSerializer(serializers.ModelSerializer):
         author  = serializers.SerializerMethodField("get_author")
         url     = serializers.SerializerMethodField("get_url")
+        image_url= serializers.SerializerMethodField("get_image_url")
 
         class Meta:
             model = Post
-            fields = ("id", "url", "title", "content", "author")
+            fields = ("id", "url", "title", "content", "author", "image_url")
 
         def get_author(self, post) -> Optional[str]:
             return post.author.username
@@ -90,6 +101,11 @@ class PostApi(ApiAuthMixin, APIView):
             path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
             return request.build_absolute_uri(path)
 
+        def get_image_url(self, post) -> Optional[str]:
+            if post.image_id:
+                return post.image.url
+
+
     @extend_schema(
         responses   = OutPutPostSerializer,
         request     = InputPostSerializer,
@@ -97,17 +113,28 @@ class PostApi(ApiAuthMixin, APIView):
     def post(self, request):
         serializer = self.InputPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        try:
+
+        file_id = 0
+        file =  serializer.validated_data.get("file")
+        if file:
+            img_service = FileStandardUploadService(user=request.user, file_obj=serializer.validated_data.get("file"))
+            file = img_service.create()
+            file_id = file.id 
+
+
+        try: 
             query = post_create(
                 user    = request.user,
                 title   = serializer.validated_data.get("title"),
                 content = serializer.validated_data.get("content"),
+                image_id= file_id,
             )
         except Exception as ex:
             return Response(
                 {"detail": "Database Error - " + str(ex)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # return Response(status=status.HTTP_200_OK)
         return Response(self.OutPutPostSerializer(query, context={"request":request}).data)
 
     @extend_schema(
@@ -118,6 +145,7 @@ class PostApi(ApiAuthMixin, APIView):
         filters_serializer = self.FilterPostSerializer(data=request.query_params)
         filters_serializer.is_valid(raise_exception=True)
 
+        # reset_queries()
         try:
             query = post_list(filters=filters_serializer.validated_data, user=request.user)
         except Exception as ex:
@@ -125,14 +153,14 @@ class PostApi(ApiAuthMixin, APIView):
                 {"detail": "Filter Error - " + str(ex)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        return get_paginated_response_context(
+        data = get_paginated_response_context(
             pagination_class=self.Pagination,
             serializer_class=self.OutPutPostSerializer,
             queryset=query,
             request=request,
             view=self,
         )
+        return data
 
 
 class PostDetailApi(ApiAuthMixin, APIView):
@@ -170,7 +198,7 @@ class PostUpdateApi(ApiAuthMixin, APIView):
     class InputPostUpdateSerializer(serializers.Serializer):
         title   = serializers.CharField(max_length=100)
         content = serializers.CharField(max_length=1000)
-        
+        # file    = serializers.CharField(max_length=1000)
     
     class OutPutPostUpdateSerializer(serializers.ModelSerializer):
         author  = serializers.SerializerMethodField("get_author")
@@ -196,6 +224,7 @@ class PostUpdateApi(ApiAuthMixin, APIView):
         serializer = self.InputPostUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        return Response(data={"id": file.id, "url": file.url}, status=status.HTTP_201_CREATED)
         try:
             query = post_update(
                 user    = request.user,

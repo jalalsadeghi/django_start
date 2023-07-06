@@ -76,8 +76,8 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     objects         = BaseUserManager()
 
     EMAIL_FIELD     = "email"
-    USERNAME_FIELD  = "username"
-    REQUIRED_FIELDS = ["email"]
+    USERNAME_FIELD  = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.email
