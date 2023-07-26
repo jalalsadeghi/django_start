@@ -9,7 +9,6 @@ from dp.tests.factories import (
         PostFactory,
         )
 
-
 @pytest.fixture
 def api_client():
     user = BaseUser.objects.create_user(username= 'testuser', password='Jalal123!@#',email='testuser@gmail.com', first_name = None, last_name = None)
@@ -31,11 +30,9 @@ def user2():
 def profile1(user1):
     return ProfileFactory(user=user1)
 
-
 @pytest.fixture
 def subscription1(user1, user2):
     return SubscriptionFactory(target=user1, subscriber=user2)
-
 
 @pytest.fixture
 def post1(user1):

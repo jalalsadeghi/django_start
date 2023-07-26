@@ -27,17 +27,16 @@ class Post(BaseModel):
     def __str__(self):
         return self.slug
 
-
 class Subscription(models.Model):
-    subscriber = models.ForeignKey(BaseUser, on_delete=models.CASCADE, related_name="subs")
-    target     = models.ForeignKey(BaseUser, on_delete=models.CASCADE, related_name="targets")
+    subscriber=models.ForeignKey(BaseUser, on_delete=models.CASCADE, related_name="subs")
+    target=models.ForeignKey(BaseUser, on_delete=models.CASCADE, related_name="targets")
 
     class Meta:
         unique_together = ('subscriber', 'target')
 
     def clean(self):
         if self.subscriber == self.target:
-            raise ValidationError({"subscriber": ("subscriber cannot be equal to target")})
+            raise ValidationError({"subscriber": "subscriber cannot be equal to target"})
 
     def __str__(self):
-        return f"{self.subscriber.email}- {self.target.email}"
+        return f"{self.subscriber.email}-{self.target.email}"

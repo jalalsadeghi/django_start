@@ -16,6 +16,6 @@ urlpatterns = [
     path('api/', include(('dp.api.urls', 'api'))),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
-#
-# urlpatterns = DebugToolbarSetup.do_urls(urlpatterns)
+from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
+
+urlpatterns = DebugToolbarSetup.do_urls(urlpatterns)

@@ -23,7 +23,6 @@ djangorestframework-simplejwt==5.2.2
 drf-spectacular==0.24.2
 
 django-redis==5.2.0
-Faker==15.1.1
-factory-boy==3.2.1
-pytest==7.2.0
-pytest-django==4.5.2
+
+
+

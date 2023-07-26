@@ -180,19 +180,3 @@ from config.settings.sentry import *  # noqa
 from config.settings.files_and_storages import *  # noqa
 # from config.settings.email_sending import *  # noqa
 
-LOGGING = {
-    'version': 1,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'DEBUG',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-    }
-}
