@@ -119,8 +119,7 @@ class PostApi(ApiAuthMixin, APIView):
         if file:
             img_service = FileStandardUploadService(user=request.user, file_obj=serializer.validated_data.get("file"))
             file = img_service.create()
-            file_id = file.id 
-
+            file_id = file.id
 
         try: 
             query = post_create(
@@ -135,7 +134,8 @@ class PostApi(ApiAuthMixin, APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         # return Response(status=status.HTTP_200_OK)
-        return Response(self.OutPutPostSerializer(query, context={"request":request}).data)
+        # return Response(self.OutPutPostSerializer(query, context={"request":request}).data)
+        return Response("file:",file)
 
     @extend_schema(
         parameters=[FilterPostSerializer],
