@@ -10,10 +10,10 @@ class Post(BaseModel):
             max_length=100,
     )
     title = models.CharField(
-        max_length=100,
+            max_length=100,
     )
     content = models.CharField(
-        max_length=1000,
+            max_length=1000,
     )
     author = models.ForeignKey(
             BaseUser, 

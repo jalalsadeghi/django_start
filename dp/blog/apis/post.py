@@ -21,7 +21,7 @@ from typing import Optional
 
 class PostAllApi(APIView):
     class Pagination(LimitOffsetPagination):
-        default_limit = 10
+        default_limit = 30
 
     class OutPutPostAllSerializer(serializers.ModelSerializer):
         author = serializers.SerializerMethodField("get_author")
@@ -50,44 +50,44 @@ class PostAllApi(APIView):
     def get(self, request):
 
         try:
-            query = postAll_list()
+            query = postAll_list().select_related('author', 'image')
         except Exception as ex:
             return Response(
                 {"detail": "Filter Error - " + str(ex)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         data = get_paginated_response_context(
-            pagination_class=self.Pagination,
-            serializer_class=self.OutPutPostAllSerializer,
-            queryset=query,
-            request=request,
-            view=self,
+            pagination_class = self.Pagination,
+            serializer_class = self.OutPutPostAllSerializer,
+            queryset = query,
+            request = request,
+            view = self,
         )
         return data
 
 
 class PostApi(ApiAuthMixin, APIView):
     class Pagination(LimitOffsetPagination):
-        default_limit = 10
+        default_limit = 30
 
     class FilterPostSerializer(serializers.Serializer):
-        title               = serializers.CharField(required=False, max_length=100)
-        search              = serializers.CharField(required=False, max_length=100)
-        created_at__range   = serializers.CharField(required=False, max_length=100)
-        author__in          = serializers.CharField(required=False, max_length=100)
-        slug                = serializers.CharField(required=False, max_length=100)
-        content             = serializers.CharField(required=False, max_length=1000)
-        id                  = serializers.IntegerField(required=False)
+        title = serializers.CharField(required=False, max_length=100)
+        search = serializers.CharField(required=False, max_length=100)
+        created_at__range = serializers.CharField(required=False, max_length=100)
+        author__in = serializers.CharField(required=False, max_length=100)
+        slug = serializers.CharField(required=False, max_length=100)
+        content = serializers.CharField(required=False, max_length=1000)
+        id = serializers.IntegerField(required=False)
 
     class InputPostSerializer(serializers.Serializer):
-        title   = serializers.CharField(max_length=100)
+        title = serializers.CharField(max_length=100)
         content = serializers.CharField(max_length=1000)
-        file    = serializers.FileField(required=False)
+        file = serializers.FileField(required=False)
 
     class OutPutPostSerializer(serializers.ModelSerializer):
-        author  = serializers.SerializerMethodField("get_author")
-        url     = serializers.SerializerMethodField("get_url")
-        image_url= serializers.SerializerMethodField("get_image_url")
+        author = serializers.SerializerMethodField("get_author")
+        url = serializers.SerializerMethodField("get_url")
+        image_url = serializers.SerializerMethodField("get_image_url")
 
         class Meta:
             model = Post
@@ -98,7 +98,7 @@ class PostApi(ApiAuthMixin, APIView):
 
         def get_url(self, post) -> Optional[str]:
             request = self.context.get("request")
-            path    = reverse("api:blog:post_detail", args=(post.id, post.slug,))
+            path = reverse("api:blog:post_detail", args=(post.id, post.slug,))
             return request.build_absolute_uri(path)
 
         def get_image_url(self, post) -> Optional[str]:
@@ -107,8 +107,8 @@ class PostApi(ApiAuthMixin, APIView):
 
 
     @extend_schema(
-        responses   = OutPutPostSerializer,
-        request     = InputPostSerializer,
+        responses = OutPutPostSerializer,
+        request = InputPostSerializer,
     )
     def post(self, request):
         serializer = self.InputPostSerializer(data=request.data)
@@ -123,10 +123,10 @@ class PostApi(ApiAuthMixin, APIView):
 
         try: 
             query = post_create(
-                user    = request.user,
-                title   = serializer.validated_data.get("title"),
+                user = request.user,
+                title = serializer.validated_data.get("title"),
                 content = serializer.validated_data.get("content"),
-                image_id= file_id,
+                image_id = file_id,
             )
         except Exception as ex:
             return Response(
@@ -147,7 +147,7 @@ class PostApi(ApiAuthMixin, APIView):
 
         # reset_queries()
         try:
-            query = post_list(filters=filters_serializer.validated_data, user=request.user)
+            query = post_list(filters=filters_serializer.validated_data, user=request.user).select_related('author', 'image')
         except Exception as ex:
             return Response(
                 {"detail": "Filter Error - " + str(ex)},
