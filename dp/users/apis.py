@@ -4,9 +4,6 @@ from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-
 from django.core.validators import MinLengthValidator
 from .validators import number_validator, special_char_validator, letter_validator
 from dp.api.mixins import ApiAuthMixin
@@ -19,24 +16,6 @@ from drf_spectacular.utils import extend_schema
 from django.core.cache import cache
 
 from typing import Optional
-
-
-class LoginJwtApi(TokenObtainPairView):
-
-    class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-        def validate(self, attrs):
-            data = super().validate(attrs)
-            refresh = self.get_token(self.user)
-
-            # Add extra responses here
-            # data['username'] = self.user.username
-            # data['email'] = self.user.email
-            # data['groups'] = self.user.groups.values_list('name', flat=True)
-            data['roles'] = self.user.groups.values_list('id', flat=True)
-            return data
-        
-    serializer_class = MyTokenObtainPairSerializer
-
 
 
 class ProfileApi(ApiAuthMixin, APIView):

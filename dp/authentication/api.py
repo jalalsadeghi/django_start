@@ -4,15 +4,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from dp.api.mixins import ApiAuthMixin
 
-# class LogoutApi(ApiAuthMixin,APIView):
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-#     def post(self, request):
-#         try:
-#             refresh_token = request.data["refresh_token"]
-#             token = RefreshToken(refresh_token)
-#             token.blacklist()
 
-#             return Response(status=status.HTTP_205_RESET_CONTENT)
-#         except Exception as e:
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
+class LoginJwtApi(TokenObtainPairView):
+    class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+        def validate(self, attrs):
+            data = super().validate(attrs)
+            # refresh = self.get_token(self.user)
+
+            data['roles'] = self.user.groups.values_list('id', flat=True)
+            return data
+
+    serializer_class = MyTokenObtainPairSerializer
         
