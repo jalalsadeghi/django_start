@@ -1,67 +1,31 @@
 version: "3.9"
 
 services:
+  app:
+    build:
+      context: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src:/src
+      - ./data/web:/vol/web
+    depends_on:
+      - db
+
+
   db:
-    image: postgres:14.1
+    image: postgres:14-alpine
     ports:
       - 5432:5432
-    environment:
-      - POSTGRES_DB=dp
-      - POSTGRES_USER=dp
-      - POSTGRES_PASSWORD=dp123
-
-  rabbitmq:
-    image: "rabbitmq:alpine"
-
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
-
-  django:
-    build:
-      context: .
-      dockerfile: docker/local.Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
-    environment:
-      - DATABASE_URL=psql://dp:dp123@db:5432/dp
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - rabbitmq
-    restart: on-failure
-
-  celery:
-    build:
-      context: .
-      dockerfile: docker/local.Dockerfile
-    command: celery -A dp.tasks worker -l info --without-gossip --without-mingle --without-heartbeat
+      - postgres-data:/var/lib/postgresql/data
     environment:
-      - DATABASE_URL=psql://dp:dp123@db:5432/dp
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-      - rabbitmq
-    restart: on-failure
+      - POSTGRES_DB=djangostart
+      - POSTGRES_USER=pro
+      - POSTGRES_PASSWORD=pro123
 
-  beats:
-    build:
-      context: .
-      dockerfile: docker/local.Dockerfile
-    command: celery -A dp.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    environment:
-      - DATABASE_URL=psql://dp:dp123@db:5432/dp
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-      - rabbitmq
-    restart: on-failure
+volumes:
+  postgres-data:
