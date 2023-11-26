@@ -1,5 +1,8 @@
 FROM jalalsadeghi/docker_base:0.2.1
 
+ENV PYTHONUNBUFFERED 1
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
+
 COPY ./requirements /requirements
 COPY ./scripts /scripts
 COPY ./src /src

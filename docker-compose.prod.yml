@@ -4,11 +4,12 @@ services:
   app:
     build:
       context: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     restart: always
     volumes:
       - static-data:/vol/web
-    depends_on:
-      - db
     environment:
       - APP_ENV=production
 
@@ -23,17 +24,5 @@ services:
     volumes:
       - static-data:/vol/static
 
-  db:
-    image: postgres:14-alpine
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=product
-      - POSTGRES_USER=pro
-      - POSTGRES_PASSWORD=pro123
-
 volumes:
   static-data:
-  postgres-data:
