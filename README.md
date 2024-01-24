@@ -2,7 +2,7 @@
 Django-Start is the initial starting point of the Django API project, which is implemented based on the [Django-Styleguide](https://github.com/HackSoftware/Django-Styleguide) structure. Just clone it from Github and develop your project.
 
 ## Structure:
-- Docker for the develop environment
+- Docker for develop environment
 - Docker for production environment, using nginx
 - Postgresql database implemented on [hub.docker (docker_django)](https://hub.docker.com/jalalsadeghi/docker_base)
 - Implementation of requirements in the development and production environment and implemented on the [hub.docker (docker_django)](https://hub.docker.com/jalalsadeghi/docker_base)
