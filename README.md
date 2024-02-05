@@ -21,7 +21,7 @@ git clone https://github.com/jalalsadeghi/django_start.git
 ```
 2- Create your .env
 ```
-cd simple_blog/src
+cd django_start/src
 cp .env.example .env
 cd ..
 ```
